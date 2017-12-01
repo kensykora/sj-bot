@@ -3,7 +3,7 @@ var logger = require('winston');
 //var auth = optional('./auth.json');
 
 const idiotRoleName = 'idiots'
-const idiotGameName = 'FTL: Faster Than Light'
+const idiotGameName = 'World of Warcraft'
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
