@@ -6,6 +6,8 @@ const app = express();
 const idiotRoleName = 'idiots'
 const idiotGameName = 'World of Warcraft'
 
+process.setMaxListeners(0);
+
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(logger.transports.Console, {
@@ -16,7 +18,7 @@ logger.level = 'debug';
 // Initialize Discord Bot
 var bot = new Discord.Client();
 
-function addToIdiots(userId) {
+async function addToIdiots(userId) {
     for(var g of bot.guilds) {
         for(var r of g[1].roles) {
             if(r[1].name == idiotRoleName) {
@@ -24,14 +26,14 @@ function addToIdiots(userId) {
                 var member = g[1].members.find('id', userId);
                 if(member != null) {
                     logger.debug('extra found');
-                    member.addRole(r[0]);
+                    await member.addRole(r[0]);
                 }
             }
         }
     }
 }
 
-function removeFromidiots(userId) {
+async function removeFromidiots(userId) {
     for(var g of bot.guilds) {
         for(var r of g[1].roles) {
             if(r[1].name == idiotRoleName) {
@@ -39,7 +41,7 @@ function removeFromidiots(userId) {
                 var member = g[1].members.find('id', userId);
                 if(member != null) {
                     logger.debug('extra found');
-                    member.removeRole(r[0]);
+                    await member.removeRole(r[0]);
                 }
             }
         }
