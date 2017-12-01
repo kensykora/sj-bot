@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 var logger = require('winston');
-var auth = require('./auth.json');
-var _ = require('lodash');
+//var auth = optional('./auth.json');
 
 const idiotRoleName = 'idiots'
 const idiotGameName = 'FTL: Faster Than Light'
@@ -84,4 +83,4 @@ bot.on('presenceUpdate', (oldMember, newMember) => {
     }
 });
 
-bot.login(auth.token);
+bot.login(process.env.DISCORD_KEY);
