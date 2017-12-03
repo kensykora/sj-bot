@@ -1,9 +1,19 @@
 import * as Discord from "discord.js";
 import * as express from "express";
 import * as http from "http";
+import * as applicationinsights from "applicationinsights";
 
 const idiotRoleName = "idiots";
 const idiotGameName = "World of Warcraft";
+
+applicationinsights.setup()
+    .setAutoCollectRequests(true)
+    .setAutoCollectPerformance(true)
+    .setAutoCollectExceptions(true)
+    .setAutoCollectConsole(true)
+    .start();
+
+const ai = applicationinsights.client;
 
 process.setMaxListeners(0);
 
@@ -18,8 +28,10 @@ async function addToIdiots(userId: string) {
                 if (member != undefined) {
                     try {
                         await member.addRole(r[0]);
+                        ai.trackEvent("idiot", { name: member.user.username });
                     } catch (e) {
                         console.error(e);
+                        ai.trackException(new Error("Error trying to add idiot: " + e));
                     }
                 }
             }
@@ -33,7 +45,11 @@ async function removeFromidiots(userId: string) {
             if (r[1].name == idiotRoleName) {
                 const member = g[1].members.find("id", userId);
                 if (member != undefined) {
-                    await member.removeRole(r[0]);
+                    try {
+                        await member.removeRole(r[0]);
+                    } catch (e) {
+                        ai.trackException(new Error("Error trying to remove idiot: " + e));
+                    }
                 }
             }
         }
@@ -47,16 +63,20 @@ bot.on("ready", () => {
             if (r[1].name == idiotRoleName) {
                 for (const m of g[1].members) {
                     const member = m[1];
-                    if (member.user.presence.game != undefined && member.user.presence.game.name == idiotGameName) {
+                    if (member.user.presence.game != undefined && member.user.presence.game.name.indexOf(idiotGameName) >= 0) {
                         try {
-                        member.addRole(r[0]);
+                            console.log("found idiot on start: " + member.user.username);
+                            ai.trackEvent("idiot", { name: member.user.username });
+                            member.addRole(r[0]);
                         } catch (e) {
                             console.error(e);
+                            ai.trackException(new Error("Error trying to add idiot: " + e));
                         }
                     } else {
                         try {
                         member.removeRole(r[1]);
                         } catch (e) {
+                            ai.trackException(new Error("Error trying to remove idiot: " + e));
                             console.error(e);
                         }
                     }
@@ -66,9 +86,6 @@ bot.on("ready", () => {
     }
 });
 
-bot.on("message", message => {
-    console.log(message.content);
-});
 bot.on("presenceUpdate", (oldMember, newMember) => {
     let gameName: string;
     if (newMember.presence.game != undefined) {
@@ -88,7 +105,11 @@ bot.on("presenceUpdate", (oldMember, newMember) => {
     }
 });
 
-bot.login(process.env.DISCORD_KEY).catch(reason => {
+bot.login(process.env.DISCORD_KEY)
+.then(() => {
+    console.log("login success");
+})
+.catch(reason => {
     console.error(reason);
 });
 

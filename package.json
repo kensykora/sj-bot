@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "applicationinsights": "^1.0.1",
     "core-js": "^2.5.1",
     "discord.js": "^11.2.1",
     "ejs": "^2.5.7",
@@ -35,6 +36,7 @@
     "url": "git+https://github.com/kensykora/auto-idiot-bot.git"
   },
   "devDependencies": {
+    "@types/applicationinsights": "^0.15.34",
     "@types/express": "^4.0.39",
     "@types/node": "^8.0.53",
     "@types/winston": "^2.3.7",
