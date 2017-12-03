@@ -3,7 +3,7 @@ import * as express from "express";
 import * as http from "http";
 
 const idiotRoleName = "idiots";
-const idiotGameName = "FTL";
+const idiotGameName = "World of Warcraft";
 
 process.setMaxListeners(0);
 
@@ -11,7 +11,6 @@ process.setMaxListeners(0);
 const bot = new Discord.Client();
 
 async function addToIdiots(userId: string) {
-
     for (const g of bot.guilds) {
         for (const r of g[1].roles) {
             if (r[1].name == idiotRoleName) {
