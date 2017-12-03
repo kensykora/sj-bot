@@ -15,7 +15,7 @@
     "debug": "npm run build && npm run watch-debug",
     "serve-debug": "./node_modules/.bin/nodemon --debug-brk --debug=5858 --inspect dist/index.js",
     "watch-debug": "./node_modules/.bin/concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
-    "postinstall": "build"
+    "postinstall": "npm run build"
   },
   "author": "",
   "license": "ISC",
