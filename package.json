@@ -4,7 +4,6 @@
   "description": "",
   "main": "bot.js",
   "scripts": {
-    "preinstall": "npm install --only=dev",
     "start": "npm run build && npm run watch",
     "build": "npm run build-ts && npm run tslint",
     "serve": "./node_modules/.bin/nodemon dist/index.js",
@@ -16,7 +15,7 @@
     "debug": "npm run build && npm run watch-debug",
     "serve-debug": "./node_modules/.bin/nodemon --debug-brk --debug=5858 --inspect dist/index.js",
     "watch-debug": "./node_modules/.bin/concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build-ts"
   },
   "author": "",
   "license": "ISC",
