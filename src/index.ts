@@ -13,7 +13,7 @@ applicationinsights.setup()
     .setAutoCollectConsole(true)
     .start();
 
-const ai = applicationinsights.client;
+const ai = applicationinsights.defaultClient;
 
 process.setMaxListeners(0);
 
@@ -27,11 +27,12 @@ async function addToIdiots(userId: string) {
                 const member = g[1].members.find("id", userId);
                 if (member != undefined) {
                     try {
+                        console.log("Found idiot: " + member.user.username);
                         await member.addRole(r[0]);
-                        ai.trackEvent("idiot", { name: member.user.username });
+                        ai.trackEvent({name: "idiot", properties: { name: member.user.username }});
                     } catch (e) {
                         console.error(e);
-                        ai.trackException(new Error("Error trying to add idiot: " + e));
+                        ai.trackException({exception: new Error(e)});
                     }
                 }
             }
@@ -48,7 +49,7 @@ async function removeFromidiots(userId: string) {
                     try {
                         await member.removeRole(r[0]);
                     } catch (e) {
-                        ai.trackException(new Error("Error trying to remove idiot: " + e));
+                        ai.trackException({exception: new Error("Error trying to remove idiot: " + e)});
                     }
                 }
             }
@@ -66,18 +67,18 @@ bot.on("ready", () => {
                     if (member.user.presence.game != undefined && member.user.presence.game.name.indexOf(idiotGameName) >= 0) {
                         try {
                             console.log("found idiot on start: " + member.user.username);
-                            ai.trackEvent("idiot", { name: member.user.username });
+                            ai.trackEvent({name: "idiot", properties: { name: member.user.username } });
                             member.addRole(r[0]);
                         } catch (e) {
                             console.error(e);
-                            ai.trackException(new Error("Error trying to add idiot: " + e));
+                            ai.trackException({exception: new Error("Error trying to add idiot: " + e)});
                         }
                     } else {
                         try {
                         member.removeRole(r[1]);
                         } catch (e) {
-                            ai.trackException(new Error("Error trying to remove idiot: " + e));
                             console.error(e);
+                            ai.trackException({exception: new Error("Error trying to remove idiot: " + e)});
                         }
                     }
                 }
