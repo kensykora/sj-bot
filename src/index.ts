@@ -101,8 +101,8 @@ bot.on("ready", () => {
             if (r[1].name == idiotRoleName) {
                 for (const m of g[1].members) {
                     const member = m[1];
-                    var game = member.user.presence.game.name;
-                    if (!game) { game = "--"; }
+                    var game = member.user.presence.game;
+                    if (!game) { game = "--"; } else { game = game.name; }
                     if (member.user.presence.game != undefined && idiotGameNames.indexOf(member.user.presence.game.name) >= 0) {
                         try {
                             console.log('[IDIOT] ' + member.user.username + ' (' + game + ')');
