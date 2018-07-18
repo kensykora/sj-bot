@@ -65,7 +65,7 @@ bot.on("ready", () => {
                     const member = m[1];
                     if (member.user.presence.game != undefined && idiotGameNames.indexOf(member.user.presence.game.name) >= 0) {
                         try {
-                            console.log('[IDIOT] ' + m.user.username + ' playing ' + m.user.presence.game.name);
+                            console.log('[IDIOT] ' + member.user.username + ' playing ' + member.user.presence.game.name);
                             ai.trackEvent({name: "idiot", properties: { name: member.user.username } });
                             member.addRole(r[0]);
                         } catch (e) {
@@ -74,7 +74,7 @@ bot.on("ready", () => {
                         }
                     } else {
                         try {
-                            console.log('[ok] ' + m.user.username);
+                            console.log('[ok] ' + member.user.username);
                             member.removeRole(r[1]);
                         } catch (e) {
                             console.error(e);
