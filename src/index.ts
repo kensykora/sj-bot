@@ -101,7 +101,7 @@ bot.on("ready", () => {
             if (r[1].name == idiotRoleName) {
                 for (const m of g[1].members) {
                     const member = m[1];
-                    var game = member.user.presence.game;
+                    var game = member.user.presence.game.name;
                     if (!game) { game = "--"; }
                     if (member.user.presence.game != undefined && idiotGameNames.indexOf(member.user.presence.game.name) >= 0) {
                         try {
@@ -128,7 +128,7 @@ bot.on("ready", () => {
 });
 
 bot.on("presenceUpdate", (oldMember, newMember) => {
-    let gameName: string;
+    let gameName: string = "--";
     if (newMember.presence.game != undefined) {
         gameName = newMember.presence.game.name;
     }
