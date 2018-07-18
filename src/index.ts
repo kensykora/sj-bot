@@ -4,7 +4,45 @@ import * as http from "http";
 import * as applicationinsights from "applicationinsights";
 
 const idiotRoleName = "idiots";
-const idiotGameNames = ['League of Legends', 'DOTA 2', 'Heroes of the Storm', 'SMITE'];
+// https://en.wikipedia.org/wiki/List_of_multiplayer_online_battle_arena_games
+// Last updated 17 JUL 2018
+const idiotGameNames = [
+    'Defense of the Ancients',
+    'Minions',
+    'Demigod',
+    'League of Legends',
+    'Avalon Heroes',
+    'Heroes of Newerth',
+    'Monday Night Combat',
+    'Realm of the Titans',
+    'Bloodline Champions',
+    'Rise of Immortals: Battle for Graxia',
+    'Awesomenauts',
+    'Guardians of Middle-Earth',
+    'Super Monday Night Combat',
+    'Warharmmer Online: Wrath of Heroes',
+    'DOTA 2', 
+    'Panzar',
+    'Adventure Time: Battle Party',
+    'Dawngate',
+    'Fates Forever',
+    'Prime World',
+    'Vainglory',
+    'SMITE',
+    'Heroes of the Storm', 
+    'Infinite Crisis',
+    'Sins of a Dark Age',
+    'Strife',
+    'Arena of Valor',
+    'Warhammer 40,000: Dark Nexus Arena',
+    'Mobile Legends',
+    'Battlerite',
+    'Gigantic',
+    'Master X Master',
+    'Paragon',
+    'AirMech',
+    'Arena of Fate'
+];
 
 applicationinsights.setup()
     .setAutoCollectRequests(true)
@@ -63,9 +101,11 @@ bot.on("ready", () => {
             if (r[1].name == idiotRoleName) {
                 for (const m of g[1].members) {
                     const member = m[1];
+                    var game = member.user.presence.game;
+                    if (!game) { game = "--"; }
                     if (member.user.presence.game != undefined && idiotGameNames.indexOf(member.user.presence.game.name) >= 0) {
                         try {
-                            console.log('[IDIOT] ' + member.user.username + ' playing ' + member.user.presence.game.name);
+                            console.log('[IDIOT] ' + member.user.username + ' (' + game + ')');
                             ai.trackEvent({name: "idiot", properties: { name: member.user.username } });
                             member.addRole(r[0]);
                         } catch (e) {
@@ -74,7 +114,7 @@ bot.on("ready", () => {
                         }
                     } else {
                         try {
-                            console.log('[ok] ' + member.user.username);
+                            console.log('[ok] ' + member.user.username + ' (' + game + ')');
                             member.removeRole(r[1]);
                         } catch (e) {
                             console.error(e);
@@ -94,14 +134,14 @@ bot.on("presenceUpdate", (oldMember, newMember) => {
     }
 
     if (newMember.presence.game == undefined) {
-        console.log('[ok] ' + newMember.user.username);
+        console.log('[ok] ' + newMember.user.username + ' (' + gameName + ')');
         removeFromidiots(newMember.user.id);
     } else {
         if (idiotGameNames.indexOf(newMember.presence.game.name) >= 0) {
-            console.log('[IDIOT] ' + newMember.user.username + ' playing ' + newMember.user.presence.game.name);
+            console.log('[IDIOT] ' + newMember.user.username + ' (' + gameName + ')');
             addToIdiots(newMember.user.id);
         } else {
-            console.log('[ok] ' + newMember.user.username);
+            console.log('[ok] ' + newMember.user.username + ' (' + gameName + ')');
             removeFromidiots(newMember.user.id);
         }
     }
