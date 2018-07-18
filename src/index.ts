@@ -4,7 +4,7 @@ import * as http from "http";
 import * as applicationinsights from "applicationinsights";
 
 const idiotRoleName = "idiots";
-const idiotGameName = "World of Warcraft";
+const idiotGameNames = ['League of Legends', 'DOTA 2', 'Heroes of the Storm', 'SMITE'];
 
 applicationinsights.setup()
     .setAutoCollectRequests(true)
@@ -27,7 +27,6 @@ async function addToIdiots(userId: string) {
                 const member = g[1].members.find("id", userId);
                 if (member != undefined) {
                     try {
-                        console.log("Found idiot: " + member.user.username);
                         await member.addRole(r[0]);
                         ai.trackEvent({name: "idiot", properties: { name: member.user.username }});
                     } catch (e) {
@@ -64,9 +63,9 @@ bot.on("ready", () => {
             if (r[1].name == idiotRoleName) {
                 for (const m of g[1].members) {
                     const member = m[1];
-                    if (member.user.presence.game != undefined && member.user.presence.game.name.indexOf(idiotGameName) >= 0) {
+                    if (member.user.presence.game != undefined && idiotGameNames.indexOf(member.user.presence.game.name) >= 0) {
                         try {
-                            console.log("found idiot on start: " + member.user.username);
+                            console.log('[IDIOT] ' + m.user.username + ' playing ' + m.user.presence.game.name);
                             ai.trackEvent({name: "idiot", properties: { name: member.user.username } });
                             member.addRole(r[0]);
                         } catch (e) {
@@ -75,7 +74,8 @@ bot.on("ready", () => {
                         }
                     } else {
                         try {
-                        member.removeRole(r[1]);
+                            console.log('[ok] ' + m.user.username);
+                            member.removeRole(r[1]);
                         } catch (e) {
                             console.error(e);
                             ai.trackException({exception: new Error("Error trying to remove idiot: " + e)});
@@ -93,14 +93,15 @@ bot.on("presenceUpdate", (oldMember, newMember) => {
         gameName = newMember.presence.game.name;
     }
 
-    console.log("presence update: " + newMember.user.username + " (" + (gameName == undefined ? " -- " : gameName) + ")");
-
     if (newMember.presence.game == undefined) {
+        console.log('[ok] ' + newMember.user.username);
         removeFromidiots(newMember.user.id);
     } else {
-        if (newMember.presence.game.name.indexOf(idiotGameName) >= 0) {
+        if (idiotGameNames.indexOf(newMember.presence.game.name) >= 0) {
+            console.log('[IDIOT] ' + newMember.user.username + ' playing ' + newMember.user.presence.game.name);
             addToIdiots(newMember.user.id);
         } else {
+            console.log('[ok] ' + newMember.user.username);
             removeFromidiots(newMember.user.id);
         }
     }
