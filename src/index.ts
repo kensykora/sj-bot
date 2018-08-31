@@ -7,7 +7,7 @@ import * as util from "util";
 const channelToMonitor = process.env.CHANNEL_ID;
 const timeLimitMs = parseInt(process.env.TIME_LIMIT_MS);
 const idiotRoleName = "idiots";
-const keepMessageReactions = ["✅"];
+const keepMessageReactions = ["✅", "🎷"];
 const deletionSchedule: { [id: string]: NodeJS.Timer} = { }; // Map of Discord Message IDs to setTimeout identifiers
 // https://en.wikipedia.org/wiki/List_of_multiplayer_online_battle_arena_games
 // Last updated 17 JUL 2018
@@ -101,19 +101,35 @@ async function removeFromidiots(userId: string) {
     }
 }
 
-bot.on("ready", () => {
+bot.on("ready", async () => {
     console.log("I am ready!");
     initializeIdiots();
-    initializeDeletions();
+    await initializeDeletions();
 });
 
-function initializeDeletions()
-{
-    
+async function initializeDeletions() {
+    for (const c of bot.channels) {
+        if (!(c[1] instanceof Discord.TextChannel)) {
+            continue;
+        }
+
+        const txtChannel = c[1] as Discord.TextChannel;
+        if (txtChannel.id != channelToMonitor) {
+            continue;
+        }
+
+        const messages = await txtChannel.fetchMessages({ limit: 100 });
+        for (const m of messages) {
+            if (
+                !m[1].attachments.size
+                && !m[1].reactions.some(r => keepMessageReactions.includes(r.emoji.name))) {
+                    await scheduleOrPerformDeletion(m[1]);
+            }
+        }
+    }
 }
 
-function initializeIdiots() 
-{
+function initializeIdiots() {
     for (const g of bot.guilds) {
         for (const r of g[1].roles) {
             if (r[1].name == idiotRoleName) {
@@ -168,9 +184,7 @@ bot.on("presenceUpdate", (oldMember, newMember) => {
 
 async function scheduleOrPerformDeletion(msg: Discord.Message) {
     const now = new Date().getTime();
-    console.log("now: " + now);
-    console.log("created: " + msg.createdTimestamp);
-    const deleteInMs = (now + timeLimitMs) - msg.createdTimestamp;
+    const deleteInMs = (msg.createdTimestamp + timeLimitMs) - now;
     if (deleteInMs < 0) {
         await deleteMessage(msg);
     } else {
@@ -184,8 +198,13 @@ async function scheduleOrPerformDeletion(msg: Discord.Message) {
 
 async function deleteMessage(msg: Discord.Message) {
     try {
-        await msg.delete();
-        console.log("[DELETED] removed message  (" + msg.author.username + ") " + msg.id);
+        let logTag = "[DELETED - TEST RUN]";
+        if (!process.env.TEST_RUN) {
+            await msg.delete();
+            logTag = "[DELETED]";
+        }
+
+        console.log(logTag + " removed message  (" + msg.author.username + ") " + msg.id);
     } catch (err) {
         console.log("[ERROR] - Error deleting message: " + err);
     }
@@ -193,12 +212,12 @@ async function deleteMessage(msg: Discord.Message) {
 
 bot.on("message", msg => {
     if (msg.channel.id != channelToMonitor) {
-        console.log("[msg ignore] Wrong Channel (" + (msg.channel as Discord.TextChannel).name + ")");
+        console.log("[msg ignore] Wrong Channel (" + (msg.channel as Discord.TextChannel).id + ")");
         return;
     }
 
     if (msg.attachments.size) {
-        console.log("[msg ignore] Has Attachments (" + (msg.channel as Discord.TextChannel).name + ")");
+        console.log("[msg ignore] Has Attachments (" + msg.id + ")");
         return;
     }
 
