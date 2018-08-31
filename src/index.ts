@@ -212,6 +212,7 @@ function deleteMessage(msg: Discord.Message) {
         msg.delete()
             .then(() => {
                 console.log("[DELETED] removed message  (" + msg.author.username + ") " + msg.id);
+                ai.trackEvent({name: "deleted"});
             })
             .catch(err => {
                 console.log("[ERROR] - Error deleting message: " + err);
@@ -233,6 +234,7 @@ bot.on("message", msg => {
 
     if (msg.attachments.size) {
         console.log("[msg ignore] Has Attachments (" + msg.id + ")");
+        ai.trackEvent({name: "skipped"});
         return;
     }
 
@@ -245,6 +247,7 @@ bot.on("message", msg => {
             scheduleOrPerformDeletion(msg);
         } else if (collector.collected.size && deletionSchedule[msg.id]) {
             clearTimeout(deletionSchedule[msg.id]);
+            ai.trackEvent({name: "skipped"});
             delete deletionSchedule[msg.id];
             console.log("[KEEP] Keeping message " + msg.id);
         }
