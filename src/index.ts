@@ -118,14 +118,28 @@ async function initializeDeletions() {
             continue;
         }
 
-        const messages = await txtChannel.fetchMessages({ limit: 100 });
-        for (const m of messages) {
-            if (
-                !m[1].attachments.size
-                && !m[1].reactions.some(r => keepMessageReactions.includes(r.emoji.name))) {
-                    scheduleOrPerformDeletion(m[1]);
+        let last: Discord.Snowflake = undefined;
+        do {
+            console.log("pass: " + last);
+            const limit = 1;
+            const messages = last == undefined
+                ? await txtChannel.fetchMessages({ limit: limit })
+                : await txtChannel.fetchMessages({ before: last, limit: limit });
+
+            for (const m of messages) {
+                if (
+                    !m[1].attachments.size
+                    && !m[1].reactions.some(r => keepMessageReactions.includes(r.emoji.name))) {
+                        scheduleOrPerformDeletion(m[1]);
+                }
             }
-        }
+
+            if (messages.size == limit) {
+                last = messages.last().id;
+            } else {
+                last = undefined;
+            }
+        } while (last != undefined);
     }
 }
 
