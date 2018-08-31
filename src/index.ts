@@ -121,7 +121,7 @@ async function initializeDeletions() {
         let last: Discord.Snowflake = undefined;
         do {
             console.log("pass: " + last);
-            const limit = 1;
+            const limit = 50;
             const messages = last == undefined
                 ? await txtChannel.fetchMessages({ limit: limit })
                 : await txtChannel.fetchMessages({ before: last, limit: limit });
