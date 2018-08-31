@@ -123,7 +123,7 @@ async function initializeDeletions() {
             if (
                 !m[1].attachments.size
                 && !m[1].reactions.some(r => keepMessageReactions.includes(r.emoji.name))) {
-                    await scheduleOrPerformDeletion(m[1]);
+                    scheduleOrPerformDeletion(m[1]);
             }
         }
     }
@@ -182,31 +182,46 @@ bot.on("presenceUpdate", (oldMember, newMember) => {
     }
 });
 
-async function scheduleOrPerformDeletion(msg: Discord.Message) {
+function scheduleOrPerformDeletion(msg: Discord.Message) {
     const now = new Date().getTime();
     const deleteInMs = (msg.createdTimestamp + timeLimitMs) - now;
     if (deleteInMs < 0) {
-        await deleteMessage(msg);
+        deleteMessage(msg);
     } else {
         console.log("[SCHEDULE] scheduling deletion of message (" + msg.author.username + ") " + msg.id + " in " + deleteInMs + "ms");
         deletionSchedule[msg.id] =
             setTimeout(async () => {
-                await deleteMessage(msg);
+                deleteMessage(msg);
             }, deleteInMs);
+        if (process.env.TEST_RUN) {
+            msg.react("⏳")
+                .catch(err => {
+                    console.log("error applying ⏳ reaction: " + err);
+                });
+        } else {
+            msg.clearReactions()
+                .catch(err => {
+                    console.log("error clearing reactions: " + err);
+                });
+        }
     }
 }
 
-async function deleteMessage(msg: Discord.Message) {
-    try {
-        let logTag = "[DELETED - TEST RUN]";
-        if (!process.env.TEST_RUN) {
-            await msg.delete();
-            logTag = "[DELETED]";
-        }
-
-        console.log(logTag + " removed message  (" + msg.author.username + ") " + msg.id);
-    } catch (err) {
-        console.log("[ERROR] - Error deleting message: " + err);
+function deleteMessage(msg: Discord.Message) {
+    if (!process.env.TEST_RUN) {
+        msg.delete()
+            .then(() => {
+                console.log("[DELETED] removed message  (" + msg.author.username + ") " + msg.id);
+            })
+            .catch(err => {
+                console.log("[ERROR] - Error deleting message: " + err);
+            });
+    } else {
+        msg.react("💣")
+            .catch(err => {
+                console.log("error applying 💣 reaction: " + err);
+            });
+        console.log("[DELETED - TEST RUN] removed message  (" + msg.author.username + ") " + msg.id);
     }
 }
 
@@ -224,7 +239,7 @@ bot.on("message", msg => {
     scheduleOrPerformDeletion(msg);
 
     const collector = msg.createReactionCollector((r: Discord.MessageReaction) => keepMessageReactions.includes(r.emoji.name), { max: 1, time: timeLimitMs });
-    collector.on( "collect", () => {
+    collector.on("collect", () => {
         // If the "keep" reaction has been cleared and it's not in the deletion schedule
         if (!collector.collected.size && !deletionSchedule[msg.id]) {
             scheduleOrPerformDeletion(msg);
