@@ -58,7 +58,10 @@ if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
     .start();
 }
 
-const ai = applicationinsights.defaultClient;
+let ai = applicationinsights.defaultClient;
+if (ai == undefined) {
+    ai = new applicationinsights.TelemetryClient("--");
+}
 
 process.setMaxListeners(0);
 
@@ -93,6 +96,7 @@ async function removeFromidiots(userId: string) {
                     try {
                         await member.removeRole(r[0]);
                     } catch (e) {
+                        console.error("Error trying to remove idiot: " + e);
                         ai.trackException({exception: new Error("Error trying to remove idiot: " + e)});
                     }
                 }
@@ -210,18 +214,33 @@ function scheduleOrPerformDeletion(msg: Discord.Message) {
         if (process.env.TEST_RUN) {
             msg.react("⏳")
                 .catch(err => {
-                    console.log("error applying ⏳ reaction: " + err);
+                    console.error("error applying ⏳ reaction: " + err);
+                    ai.trackException({exception: new Error("error applying ⏳ reaction: " + err)});
                 });
         } else {
             msg.clearReactions()
                 .catch(err => {
-                    console.log("error clearing reactions: " + err);
+                    console.error("error clearing reactions: " + err);
+                    ai.trackException({exception: new Error("error clearing reactions:" + err)});
                 });
         }
     }
 }
 
-function deleteMessage(msg: Discord.Message) {
+async function deleteMessage(msg: Discord.Message) {
+    try {
+        const doubleCheck = await msg.channel.fetchMessage(msg.id);
+        if (doubleCheck.reactions.some(r => keepMessageReactions.includes(r.emoji.name))) {
+            console.log("[msg ignore] message was scheduled for deletion, but contained the keep reaction. Keeping it. (" + msg.id + ")");
+            ai.trackEvent({name: "skipped"});
+            return;
+        }
+    } catch (err) {
+        console.error("error double checking message, skipping - " + err);
+        ai.trackException({exception: new Error("error double checking message, skipping - " + err)});
+        return;
+    }
+
     if (!process.env.TEST_RUN) {
         msg.delete()
             .then(() => {
@@ -229,12 +248,14 @@ function deleteMessage(msg: Discord.Message) {
                 ai.trackEvent({name: "deleted"});
             })
             .catch(err => {
-                console.log("[ERROR] - Error deleting message: " + err);
+                console.error("[ERROR] - Error deleting message: " + err);
+                ai.trackException({exception: new Error("[ERROR] - Error deleting message: " + err)});
             });
     } else {
         msg.react("💣")
             .catch(err => {
-                console.log("error applying 💣 reaction: " + err);
+                console.error("error applying 💣 reaction: " + err);
+                ai.trackException({exception: new Error("error applying 💣 reaction: " + err)});
             });
         console.log("[DELETED - TEST RUN] removed message  (" + msg.author.username + ") " + msg.id);
     }
@@ -274,6 +295,7 @@ bot.login(process.env.DISCORD_KEY)
 })
 .catch(reason => {
     console.error(reason);
+    ai.trackException({exception: new Error("[ERROR] - Error logging in: " + reason)});
 });
 
 // set the port of our application
