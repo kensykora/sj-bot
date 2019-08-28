@@ -229,7 +229,6 @@ async function deleteMessage(msg: Discord.Message) {
 
 bot.on("message", msg => {
     if (msg.channel.id != channelToMonitor) {
-        console.log("[msg ignore] Wrong Channel (" + (msg.channel as Discord.TextChannel).id + ")");
         return;
     }
 
