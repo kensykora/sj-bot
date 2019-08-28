@@ -12,41 +12,7 @@ const deletionSchedule: { [id: string]: NodeJS.Timer} = { }; // Map of Discord M
 // https://en.wikipedia.org/wiki/List_of_multiplayer_online_battle_arena_games
 // Last updated 17 JUL 2018
 const idiotGameNames = [
-    "Defense of the Ancients",
-    "Minions",
-    "Demigod",
-    "League of Legends",
-    "Avalon Heroes",
-    "Heroes of Newerth",
-    "Monday Night Combat",
-    "Realm of the Titans",
-    "Bloodline Champions",
-    "Rise of Immortals: Battle for Graxia",
-    "Awesomenauts",
-    "Guardians of Middle-Earth",
-    "Super Monday Night Combat",
-    "Warharmmer Online: Wrath of Heroes",
-    "DOTA 2",
-    "Panzar",
-    "Adventure Time: Battle Party",
-    "Dawngate",
-    "Fates Forever",
-    "Prime World",
-    "Vainglory",
-    "SMITE",
-    "Heroes of the Storm",
-    "Infinite Crisis",
-    "Sins of a Dark Age",
-    "Strife",
-    "Arena of Valor",
-    "Warhammer 40,000: Dark Nexus Arena",
-    "Mobile Legends",
-    "Battlerite",
-    "Gigantic",
-    "Master X Master",
-    "Paragon",
-    "AirMech",
-    "Arena of Fate"
+    "World of Warcraft Classic"
 ];
 
 if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
