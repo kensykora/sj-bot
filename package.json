@@ -41,7 +41,7 @@
     "@types/winston": "^2.3.7",
     "concurrently": "^3.4.0",
     "nodemon": "^1.11.0",
-    "shelljs": "^0.7.8",
+    "shelljs": "^0.8.5",
     "supertest": "^2.0.1",
     "ts-jest": "^19.0.8",
     "tslint": "^5.0.0",
