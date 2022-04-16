@@ -2,6 +2,18 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Heroku Docker Build",
+			"type": "shell",
+			"command": "heroku container:push -a morning-stream-21025 web",
+			"problemMatcher": []
+		},
+		{
+			"label": "Heroku Deploy",
+			"type": "shell",
+			"command": "heroku container:release -a morning-stream-21025 web",
+			"problemMatcher": []
+		},
+		{
 			"type": "npm",
 			"script": "start",
 			"problemMatcher": [],
