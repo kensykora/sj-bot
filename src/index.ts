@@ -24,10 +24,10 @@ const bot = new Discord.Client({
 
 bot.on("ready", async () => {
     console.log("I am ready!");
-    await initializeDeletions();
-
     setActivity();
     setInterval(setActivity, 60000);
+
+    await initializeDeletions();
 });
 
 function setActivity() {
