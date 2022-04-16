@@ -9,7 +9,6 @@ const timeLimitMs = parseInt(process.env.TIME_LIMIT_MS);
 const keepMessageReactions = ["✅", "🎷"];
 const deletionSchedule: { [id: string]: NodeJS.Timer } = {}; // Map of Discord Message IDs to setTimeout identifiers
 
-// const ZAStartTime = new Date("Tue, 22 Mar 2022 15:00:00 GMT").getTime();
 const ZAStartTime = new Date("Fri, 15 Apr 2022 15:00:00 GMT").getTime();
 
 process.setMaxListeners(0);
