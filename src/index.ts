@@ -131,7 +131,7 @@ bot.on("messageReactionRemove", react => {
     handleMessage(react.message as Discord.Message);
 });
 
-bot.login(process.env.DISCORD_KEY)
+bot.login(process.env.DISCORD_TOKEN)
     .then(() => {
         console.log("login success");
     })
