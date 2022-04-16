@@ -2,11 +2,15 @@ import * as Discord from "discord.js";
 import * as express from "express";
 import * as http from "http";
 import { Intents } from "discord.js";
+import { ActivityTypes } from "discord.js/typings/enums";
 
 const channelToMonitor = process.env.CHANNEL_ID;
 const timeLimitMs = parseInt(process.env.TIME_LIMIT_MS);
 const keepMessageReactions = ["✅", "🎷"];
 const deletionSchedule: { [id: string]: NodeJS.Timer } = {}; // Map of Discord Message IDs to setTimeout identifiers
+
+// const ZAStartTime = new Date("Tue, 22 Mar 2022 15:00:00 GMT").getTime();
+const ZAStartTime = new Date("Fri, 15 Apr 2022 15:00:00 GMT").getTime();
 
 process.setMaxListeners(0);
 
@@ -22,7 +26,29 @@ const bot = new Discord.Client({
 bot.on("ready", async () => {
     console.log("I am ready!");
     await initializeDeletions();
+
+    setActivity();
+    setInterval(setActivity, 60000);
 });
+
+function setActivity() {
+    const nowEpochSeconds = new Date().getTime() / 1000;
+    const ZAStartTimeSeconds = ZAStartTime / 1000;
+
+    const diff = nowEpochSeconds - ZAStartTimeSeconds;
+    const threeDaysInSeconds = 60 * 60 * 24 * 3;
+    const resets = Math.floor(diff / threeDaysInSeconds) + 1;
+    const nextResetSeconds = ZAStartTimeSeconds + (threeDaysInSeconds * resets);
+
+    const timeUntilNext = nextResetSeconds - nowEpochSeconds;
+    const daysUntil = Math.floor(timeUntilNext / (60 * 60 * 24));
+    const hoursUntil = Math.floor((timeUntilNext - (daysUntil * 60 * 60 * 24)) / (60 * 60));
+
+    bot.user.setActivity({
+        name: "for ZA in " + daysUntil + "d " + hoursUntil + "h ",
+        type: ActivityTypes.WATCHING
+    });
+}
 
 async function initializeDeletions() {
     const channel = await bot.channels.fetch(channelToMonitor);
@@ -153,7 +179,7 @@ app.listen(port, () => {
     console.log("Our app is running on " + process.env.PING_ENDPOINT);
 });
 
- // pings server every 15 minutes to prevent dynos from sleeping
- setInterval(() => {
+// pings server every 15 minutes to prevent dynos from sleeping
+setInterval(() => {
     http.get(process.env.PING_ENDPOINT);
-  }, 900000);
+}, 900000);
